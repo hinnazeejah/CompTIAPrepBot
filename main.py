@@ -85,19 +85,33 @@ async def security_quiz(interaction: discord.Interaction):
     except Exception as e:
         await interaction.followup.send("An error occurred")
 
-    reaction, user = await client.wait_for('reaction_add', check=check)
-
-    response2 = getResponse("google/gemma-7b-it:free", f"""Tell me if my answer ({reaction}) is CORRECT or INCORRECT given the following question: [{response}]. 
-    Explain why my choice is correct or incorrect and if it is incorrect, tell me what the actual correct answer is and explain why. 
-    Don't explain any of the other choices.
-    Your response should always be in this format:
-    ### Your Answer: {reaction}
-    ### Correct Answer:
-    ### Explanation:""")
-    response2 = response2['choices'][0]['message']['content']
-
     try:
+
+        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+
+        response2 = getResponse("google/gemma-7b-it:free", f"""Tell me if my answer ({reaction}) is CORRECT or INCORRECT given the following question: [{response}]. 
+        Explain why my choice is correct or incorrect and if it is incorrect, tell me what the actual correct answer is and explain why. 
+        Don't explain any of the other choices.
+        Your response should always be in this format:
+        ### Your Answer: {reaction}
+        ### Correct Answer:
+        ### Explanation:""")
+        response2 = response2['choices'][0]['message']['content']
+
         await interaction.followup.send(response2)
+
+    except TimeoutError:
+
+        response2 = getResponse("google/gemma-7b-it:free", f"""Tell me the correct answer given the following question: [{response}]. 
+        Explain why that answer is correct.
+        Don't explain any of the other choices.
+        Your response should always be in this format:
+        ### Correct Answer:
+        ### Explanation:""")
+        response2 = response2['choices'][0]['message']['content']
+
+        await interaction.followup.send("Your time has run out!\n" + response2)
+
     except Exception as e:
         await interaction.followup.send("An error occurred")
 
