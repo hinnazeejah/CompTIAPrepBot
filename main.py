@@ -30,35 +30,8 @@ def getResponse(model, query):
 
 client = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-@client.event
-async def on_ready():
-    await client.change_presence(activity=discord.Game(name="Helping students prepare for the Security+!"))
-    try:
-        synced = await client.tree.sync()
-        print(f"Synced {len(synced)} commands")
-    except Exception as e:
-        print(e)
 
-    print("Ready to prep for Security+!")
-
-@client.tree.command(name="securityprep", description="Learn about specific Security+ topics.")
-async def security_learn(interaction: discord.Interaction, topic: str):
-
-    await interaction.response.defer(ephemeral=False)
-
-    response = getResponse("gryphe/mythomist-7b:free", f"""I am currently studying to get my CompTIA Security+. I want you to act as if you are my tutor preparing me for the exam. I am going to ask you a question about {topic}. I want your answers to include a few things: the general overview of the concept and what I might need to know about it for the Security+ Exam. Answer all of my questions in this format, until I say otherwise. 
-                           
-    Question: What is {topic}?""")
-
-    response = response['choices'][0]['message']['content']
-    try:
-       
-        await interaction.followup.send(response)
-    except Exception as e:
-        await interaction.followup.send("An error occurred")
-
-@client.tree.command(name="securityquiz", description="Generate a practice multiple choice question to prepare for the Security+!")
-async def security_quiz(interaction: discord.Interaction):
+async def quiz(interaction, test):
     await interaction.response.defer(ephemeral=False)
 
     react = ["🇦","🇧","🇨","🇩"]
@@ -66,10 +39,10 @@ async def security_quiz(interaction: discord.Interaction):
     def check(reaction, user):
         return user == interaction.user and str(reaction.emoji) in react
 
-    response = getResponse("google/gemma-7b-it:free", f"""I am currently studying to get my CompTIA Security+. 
-    I want you to provide me with a practice A, B, C, D-style multiple choice question to prepare me for the Security+ exam. 
-    Base the question on the Security+ exam objectives. There should be one clear answer. 
-    Only give me questions that are related to the Security+ exam.
+    response = getResponse("google/gemma-7b-it:free", f"""I am currently studying to get my CompTIA {test}. 
+    I want you to provide me with a practice A, B, C, D-style multiple choice question to prepare me for the {test} exam. 
+    Base the question on the {test} exam objectives. There should be one clear answer. 
+    Only give me questions that are related to the {test} exam.
     Only return the question and the answer choices. I don't need any introductions, instructions, or explanations, just get to the point.
     Don't tell me what the correct answer is. Also don't repeat the answer choices.
     Your response should always be in this format:
@@ -114,6 +87,46 @@ async def security_quiz(interaction: discord.Interaction):
 
     except Exception as e:
         await interaction.followup.send("An error occurred")
+
+
+@client.event
+async def on_ready():
+    await client.change_presence(activity=discord.Game(name="Helping students prepare for the Security+!"))
+    try:
+        synced = await client.tree.sync()
+        print(f"Synced {len(synced)} commands")
+    except Exception as e:
+        print(e)
+
+    print("Ready to prep for Security+!")
+
+@client.tree.command(name="securityprep", description="Learn about specific Security+ topics.")
+async def security_learn(interaction: discord.Interaction, topic: str):
+
+    await interaction.response.defer(ephemeral=False)
+
+    response = getResponse("gryphe/mythomist-7b:free", f"""I am currently studying to get my CompTIA Security+. I want you to act as if you are my tutor preparing me for the exam. I am going to ask you a question about {topic}. I want your answers to include a few things: the general overview of the concept and what I might need to know about it for the Security+ Exam. Answer all of my questions in this format, until I say otherwise. 
+                           
+    Question: What is {topic}?""")
+
+    response = response['choices'][0]['message']['content']
+    try:
+       
+        await interaction.followup.send(response)
+    except Exception as e:
+        await interaction.followup.send("An error occurred")
+
+@client.tree.command(name="sec_plus_quiz", description="Generate a practice multiple choice question to prepare for the Security+!")
+async def security_quiz(interaction: discord.Interaction):
+    await quiz(interaction, "Security+")
+
+@client.tree.command(name="a_plus_quiz", description="Generate a practice multiple choice question to prepare for the A+!")
+async def security_quiz(interaction: discord.Interaction):
+    await quiz(interaction, "A+")
+
+@client.tree.command(name="net_plus_quiz", description="Generate a practice multiple choice question to prepare for the Network+!")
+async def security_quiz(interaction: discord.Interaction):
+    await quiz(interaction, "Network+")
 
 
 client.run(DISCORD_TOKEN)
