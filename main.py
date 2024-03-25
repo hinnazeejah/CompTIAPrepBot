@@ -47,7 +47,11 @@ async def quiz(interaction, test):
     Don't tell me what the correct answer is. Also don't repeat the answer choices.
     Your response should always be in this format:
     ### Question:
-    ### Answer Choices:""")
+    ### Answer Choices:
+    A.
+    B.
+    C.
+    D.""")
 
     response = response['choices'][0]['message']['content']
 
@@ -62,12 +66,12 @@ async def quiz(interaction, test):
 
         reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
 
-        response2 = getResponse("google/gemma-7b-it:free", f"""Tell me if my answer ({reaction}) is CORRECT or INCORRECT given the following question: [{response}]. 
+        response2 = getResponse("google/gemma-7b-it:free", f"""Based on the {test} exam objectives, tell me if my answer ({reaction}) is CORRECT or INCORRECT given the following question: [{response}]. 
         Explain why my choice is correct or incorrect and if it is incorrect, tell me what the actual correct answer is and explain why. 
         Don't explain any of the other choices.
         Your response should always be in this format:
         ### Your Answer: {reaction}
-        ### Correct Answer:
+        ### Correct Answer: (a, b, c, or d)
         ### Explanation:""")
         response2 = response2['choices'][0]['message']['content']
 
@@ -75,11 +79,11 @@ async def quiz(interaction, test):
 
     except TimeoutError:
 
-        response2 = getResponse("google/gemma-7b-it:free", f"""Tell me the correct answer given the following question: [{response}]. 
+        response2 = getResponse("google/gemma-7b-it:free", f"""Based on the {test} exam objectives, tell me the correct answer given the following question: [{response}]. 
         Explain why that answer is correct.
         Don't explain any of the other choices.
         Your response should always be in this format:
-        ### Correct Answer:
+        ### Correct Answer: (a, b, c, or d)
         ### Explanation:""")
         response2 = response2['choices'][0]['message']['content']
 
@@ -91,16 +95,16 @@ async def quiz(interaction, test):
 
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name="Helping students prepare for the Security+!"))
+    await client.change_presence(activity=discord.Game(name="Helping students prepare for their CompTIA exams!"))
     try:
         synced = await client.tree.sync()
         print(f"Synced {len(synced)} commands")
     except Exception as e:
         print(e)
 
-    print("Ready to prep for Security+!")
+    print("Ready to prep for you certifications!")
 
-@client.tree.command(name="securityprep", description="Learn about specific Security+ topics.")
+@client.tree.command(name="sec_plus_prep", description="Learn about specific Security+ topics.")
 async def security_learn(interaction: discord.Interaction, topic: str):
 
     await interaction.response.defer(ephemeral=False)
