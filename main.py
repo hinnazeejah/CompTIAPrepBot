@@ -56,7 +56,7 @@ async def quiz(interaction, test):
     response = response['choices'][0]['message']['content']
 
     try:
-        mes = await interaction.channel.send(response)
+        mes = await interaction.followup.send(response)
         for tmp in react:
             await mes.add_reaction(tmp)
     except Exception as e:
@@ -75,7 +75,7 @@ async def quiz(interaction, test):
         ### Explanation:""")
         response2 = response2['choices'][0]['message']['content']
 
-        await interaction.followup.send(response2)
+        await interaction.followup.send(f"{interaction.user.mention}\n" + response2)
 
     except TimeoutError:
 
@@ -87,7 +87,7 @@ async def quiz(interaction, test):
         ### Explanation:""")
         response2 = response2['choices'][0]['message']['content']
 
-        await interaction.followup.send("Your time has run out!\n" + response2)
+        await interaction.followup.send(f"{interaction.user.mention}, your time has run out!\n" + response2)
 
     except Exception as e:
         await interaction.followup.send("An error occurred")
